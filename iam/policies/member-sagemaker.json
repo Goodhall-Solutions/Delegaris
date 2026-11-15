@@ -1,0 +1,19 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "StartAndStopNotebooks",
+      "Effect": "Allow",
+      "Action": [
+        "sagemaker:ListNotebookInstances",
+        "sagemaker:DescribeNotebookInstance",
+        "sagemaker:ListTags",
+        "sagemaker:StartNotebookInstance",
+        "sagemaker:StopNotebookInstance",
+        "sagemaker:AddTags",
+        "sagemaker:DeleteTags"
+      ],
+      "Resource": "*"
+    }
+  ]
+}

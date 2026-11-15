@@ -1,2 +1,4 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+# The installer is run straight from GitHub by bash, so it must keep LF line endings.
+*.sh text eol=lf

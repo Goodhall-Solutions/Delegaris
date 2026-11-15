@@ -1,0 +1,18 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "PauseAndResumeRedshift",
+      "Effect": "Allow",
+      "Action": [
+        "redshift:DescribeClusters",
+        "redshift:PauseCluster",
+        "redshift:ResumeCluster",
+        "redshift:RebootCluster",
+        "redshift:CreateTags",
+        "redshift:DeleteTags"
+      ],
+      "Resource": "*"
+    }
+  ]
+}

@@ -1,0 +1,111 @@
+Delegaris Free Licence
+Version 1.0, November 2026
+
+Copyright (c) 2026 Goodhall Solutions Ltd. All rights reserved.
+
+Delegaris is free. This licence says what you may do with it. By installing or
+using Delegaris you agree to it. If you do not agree, do not install or use it.
+
+"Delegaris" or "the Software" means the Delegaris software made available by
+Goodhall Solutions Ltd ("we", "us"), in any form (including the Docker image and
+the Linux package), with its documentation and any updates we provide. "You"
+means you and the organisation you install or use it for.
+
+1. What you may do
+
+   1.1 Install and use the Software, free of charge, for any lawful purpose,
+       including commercial purposes, on any number of servers, for any number
+       of people and any number of cloud accounts.
+
+   1.2 Make copies for installation, backup, disaster recovery and testing, and
+       keep copies in your own registries and repositories.
+
+   1.3 Install and run the Software for a client, as part of services you
+       provide to them, provided you do not charge for the Software itself and
+       you give your client a copy of this licence.
+
+   1.4 Use the branding settings in the Software to show your own
+       organisation's name, logo and colours to your users.
+
+2. What you may not do
+
+   2.1 Sell, resell, rent, lease, license or sublicense the Software, or charge
+       anyone for it.
+
+   2.2 Offer the Software to third parties as a hosted or managed service of
+       your own, or make it available to anyone outside your organisation
+       (other than a client under 1.3), without our written agreement.
+
+   2.3 Distribute modified versions of the Software, or present the Software, or
+       anything based on it, as your own product.
+
+   2.4 Remove or alter this licence, the copyright notices, or the third-party
+       licence notices included with the Software.
+
+   2.5 Use the Software in breach of any law, or to access systems or accounts
+       you are not authorised to access.
+
+   You may change the Software for your own internal use, at your own risk;
+   such changes are not supported, and 2.3 still applies.
+
+3. Ownership
+
+   The Software is licensed, not sold. Goodhall Solutions Ltd keeps all rights,
+   title and intellectual property in it. "Delegaris" and "Goodhall Solutions"
+   are our names; this licence does not give you the right to use them other
+   than to refer to the Software truthfully.
+
+   If you send us suggestions or feedback, we may use them freely.
+
+4. Third-party components
+
+   The Software includes open-source components, each under its own licence.
+   Those licences are listed in THIRD-PARTY-NOTICES, and nothing in this licence
+   limits your rights under them.
+
+5. No warranty
+
+   The Software is provided "as is" and "as available", without warranty of any
+   kind, express or implied, including any warranty of satisfactory quality,
+   fitness for a particular purpose, accuracy or non-infringement.
+
+   Delegaris starts, stops, reboots and changes the tags of cloud resources on
+   your instructions and those of the people you give access to. You are
+   responsible for how you configure it, who you give access to, the
+   permissions you grant it in your cloud accounts, keeping backups, and
+   checking that it does what you need before relying on it.
+
+6. Limitation of liability
+
+   6.1 To the fullest extent permitted by law, Goodhall Solutions Ltd is not
+       liable to you, in contract, tort (including negligence) or otherwise,
+       for any loss or damage arising out of or in connection with the
+       Software or this licence, including loss of profit, revenue, data,
+       business or goodwill, service interruption, cloud charges, or any
+       indirect or consequential loss.
+
+   6.2 If, despite 6.1, we are found liable to you, our total liability is
+       limited to one hundred pounds sterling (GBP 100).
+
+   6.3 Nothing in this licence limits or excludes liability for death or
+       personal injury caused by negligence, for fraud or fraudulent
+       misrepresentation, or for anything else that cannot be limited or
+       excluded by law.
+
+7. Ending this licence
+
+   This licence lasts until it ends. It ends automatically if you break it.
+   When it ends you must stop using the Software and delete your copies.
+   Sections 3, 5, 6 and 9 continue after it ends.
+
+8. Changes
+
+   We may offer later versions of the Software under different terms. The
+   version of the Software you have stays under the licence it came with.
+
+9. Law
+
+   This licence is governed by the law of England and Wales, and the courts of
+   England and Wales have exclusive jurisdiction over any dispute about it.
+
+Contact: contact@goodhallsolutions.co.uk

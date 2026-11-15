@@ -1,0 +1,96 @@
+# Local demo of two copies of the service sharing one PostgreSQL database, the way two
+# EC2 instances behind a load balancer would. Both serve the web UI; the one holding the
+# timed-work lease stops machines and sends reminders, and if it goes away the other
+# takes over within LEASE_SECONDS. The AWS behind it is simulated (moto).
+#
+#   docker compose -f docker-compose.cluster.yml -p delegaris-cluster up -d
+#
+# Copy one is on http://localhost:${APP_PORT:-8080}, copy two on ${APP_PORT_2:-8081}; a
+# session signed in on one works on the other (sessions live in the database). Stop one
+# with "docker compose ... stop delegaris-1" and watch /healthz on the other report
+# "role": "active" within a minute. Whichever copy starts first holds the lease, so check
+# /healthz on both first and stop the one that says "role": "active".
+#
+# Stop it and remove everything with:
+#   docker compose -f docker-compose.cluster.yml -p delegaris-cluster down -v
+# It uses the same port (8080) as the single demo, so stop one before starting the other.
+
+x-fake-aws: &fake-aws
+  AWS_ENDPOINT_URL: http://moto:5000
+  AWS_ACCESS_KEY_ID: testing
+  AWS_SECRET_ACCESS_KEY: testing
+  AWS_DEFAULT_REGION: eu-west-2
+
+x-delegaris: &delegaris
+  image: goodhallsolutions/delegaris:${DELEGARIS_TAG:-latest}
+  # Built for amd64 only; on Apple Silicon and other arm64 machines Docker emulates it.
+  platform: linux/amd64
+  environment: &delegaris-env
+    <<: *fake-aws
+    DATABASE_URL: postgresql://delegaris:delegaris@postgres:5432/delegaris
+    PUBLIC_URL: http://localhost:${APP_PORT:-8080}
+    LOCAL_ADMIN_PASSWORD: admin
+    # Both copies read the same stored secrets, so they need the same key.
+    ENCRYPTION_KEY: demo-cluster-key-not-for-real-use
+    DEMO_USERS: "dev:dev:AWS-Web-Team;lead:lead:AWS-Ops-Leads"
+    AWS_DEFAULT_REGIONS: eu-west-2
+    INVENTORY_CACHE_SECONDS: "10"
+    KEEP_ON_POLL_SECONDS: "10"
+    # Short, so a handover can be watched; 90 seconds is the default for real use.
+    LEASE_SECONDS: "30"
+  depends_on:
+    postgres:
+      condition: service_healthy
+    moto:
+      condition: service_started
+
+services:
+  moto:
+    image: motoserver/moto:5.2.5
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: delegaris
+      POSTGRES_PASSWORD: delegaris
+      POSTGRES_DB: delegaris
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U delegaris"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  delegaris-1:
+    <<: *delegaris
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    environment:
+      <<: *delegaris-env
+      NODE_NAME: copy-one
+
+  delegaris-2:
+    <<: *delegaris
+    ports:
+      - "${APP_PORT_2:-8081}:8080"
+    environment:
+      <<: *delegaris-env
+      NODE_NAME: copy-two
+
+  seed:
+    image: goodhallsolutions/delegaris:${DELEGARIS_TAG:-latest}
+    platform: linux/amd64
+    environment:
+      <<: *fake-aws
+      APP_URL: http://delegaris-1:8080
+    volumes:
+      - ./seed.py:/seed/seed.py:ro
+    command: ["python", "/seed/seed.py"]
+    depends_on:
+      delegaris-1:
+        condition: service_healthy
+    restart: "no"
+
+volumes:
+  pgdata:

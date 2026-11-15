@@ -1,0 +1,26 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ReadInstanceSchedulerConfig",
+      "Effect": "Allow",
+      "Action": "dynamodb:ListTables",
+      "Resource": "*"
+    },
+    {
+      "Sid": "ScanInstanceSchedulerConfig",
+      "Effect": "Allow",
+      "Action": "dynamodb:Scan",
+      "Resource": "arn:aws:dynamodb:*:*:table/*ConfigTable*"
+    },
+    {
+      "Sid": "ReadQuickSetupSchedules",
+      "Effect": "Allow",
+      "Action": [
+        "ssm:ListAssociations",
+        "ssm:DescribeAssociation"
+      ],
+      "Resource": "*"
+    }
+  ]
+}

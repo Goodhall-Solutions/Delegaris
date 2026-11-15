@@ -1,0 +1,19 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "StartAndStopLightsail",
+      "Effect": "Allow",
+      "Action": [
+        "lightsail:GetInstances",
+        "lightsail:GetInstance",
+        "lightsail:StartInstance",
+        "lightsail:StopInstance",
+        "lightsail:RebootInstance",
+        "lightsail:TagResource",
+        "lightsail:UntagResource"
+      ],
+      "Resource": "*"
+    }
+  ]
+}

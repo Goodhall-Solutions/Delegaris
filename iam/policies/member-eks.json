@@ -1,0 +1,18 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ListAndScaleEksNodeGroups",
+      "Effect": "Allow",
+      "Action": [
+        "eks:ListClusters",
+        "eks:ListNodegroups",
+        "eks:DescribeNodegroup",
+        "eks:UpdateNodegroupConfig",
+        "eks:TagResource",
+        "eks:UntagResource"
+      ],
+      "Resource": "*"
+    }
+  ]
+}

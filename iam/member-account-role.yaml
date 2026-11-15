@@ -1,0 +1,290 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  Role that Delegaris assumes in this account to list, start, stop and tag
+  EC2 instances, RDS databases and, where switched on, Auto Scaling groups,
+  ECS services, EKS node groups, Redshift clusters, SageMaker notebooks and
+  Lightsail instances. Deploy once per managed account (a CloudFormation
+  StackSet works well across an organisation).
+
+Parameters:
+  TrustedPrincipalArn:
+    Type: String
+    Description: >
+      ARN of the IAM role or user the Delegaris container runs as
+      (for example arn:aws:iam::111111111111:role/delegaris-task).
+    AllowedPattern: "^arn:aws[a-z-]*:iam::\\d{12}:(role|user)/.+$"
+  RoleName:
+    Type: String
+    Default: DelegarisRole
+  ExternalId:
+    Type: String
+    Default: ""
+    Description: Optional. If set, enter the same value on the account in Delegaris.
+    NoEcho: true
+  ManageEC2:
+    Type: String
+    Default: "true"
+    AllowedValues: ["true", "false"]
+    Description: Allow listing, starting, stopping and tagging EC2 instances.
+  ManageRDS:
+    Type: String
+    Default: "true"
+    AllowedValues: ["true", "false"]
+    Description: Allow listing, starting, stopping and tagging RDS databases and clusters.
+  ManageAutoScaling:
+    Type: String
+    Default: "false"
+    AllowedValues: ["true", "false"]
+    Description: Allow listing, scaling to zero and back, and tagging Auto Scaling groups.
+  ManageECS:
+    Type: String
+    Default: "false"
+    AllowedValues: ["true", "false"]
+    Description: Allow listing, scaling to zero and back, restarting and tagging ECS services.
+  ManageEKS:
+    Type: String
+    Default: "false"
+    AllowedValues: ["true", "false"]
+    Description: Allow listing, scaling to zero and back, and tagging EKS managed node groups.
+  ManageRedshift:
+    Type: String
+    Default: "false"
+    AllowedValues: ["true", "false"]
+    Description: Allow listing, pausing, resuming, rebooting and tagging Redshift clusters.
+  ManageSageMaker:
+    Type: String
+    Default: "false"
+    AllowedValues: ["true", "false"]
+    Description: Allow listing, starting, stopping and tagging SageMaker notebook instances.
+  ManageLightsail:
+    Type: String
+    Default: "false"
+    AllowedValues: ["true", "false"]
+    Description: Allow listing, starting, stopping, rebooting and tagging Lightsail instances.
+  ReadSchedules:
+    Type: String
+    Default: "false"
+    AllowedValues: ["true", "false"]
+    Description: >
+      Allow reading schedule definitions from the scheduler, if it runs in this
+      account: AWS Instance Scheduler's configuration table (DynamoDB) and
+      Systems Manager Quick Setup's associations. Read only.
+
+Conditions:
+  HasExternalId: !Not [!Equals [!Ref ExternalId, ""]]
+  Ec2: !Equals [!Ref ManageEC2, "true"]
+  Rds: !Equals [!Ref ManageRDS, "true"]
+  Schedules: !Equals [!Ref ReadSchedules, "true"]
+  AutoScaling: !Equals [!Ref ManageAutoScaling, "true"]
+  Ecs: !Equals [!Ref ManageECS, "true"]
+  Eks: !Equals [!Ref ManageEKS, "true"]
+  Redshift: !Equals [!Ref ManageRedshift, "true"]
+  SageMaker: !Equals [!Ref ManageSageMaker, "true"]
+  Lightsail: !Equals [!Ref ManageLightsail, "true"]
+
+Rules:
+  AtLeastOneService:
+    Assertions:
+      - Assert: !Or
+          - !Equals [!Ref ManageEC2, "true"]
+          - !Equals [!Ref ManageRDS, "true"]
+          - !Equals [!Ref ManageAutoScaling, "true"]
+          - !Equals [!Ref ManageECS, "true"]
+          - !Equals [!Ref ManageEKS, "true"]
+          - !Equals [!Ref ManageRedshift, "true"]
+          - !Equals [!Ref ManageSageMaker, "true"]
+          - !Equals [!Ref ManageLightsail, "true"]
+        AssertDescription: Set at least one of the Manage parameters to true.
+
+Resources:
+  Role:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref RoleName
+      Description: Assumed by Delegaris to start, stop and tag the resources it manages
+      MaxSessionDuration: 3600
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Ref TrustedPrincipalArn
+            Action: sts:AssumeRole
+            Condition: !If
+              - HasExternalId
+              - StringEquals:
+                  sts:ExternalId: !Ref ExternalId
+              - !Ref AWS::NoValue
+      Policies:
+        - PolicyName: delegaris
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - !If
+                - Ec2
+                - Sid: ListAndControlInstances
+                  Effect: Allow
+                  Action:
+                    - ec2:DescribeInstances
+                    - ec2:StartInstances
+                    - ec2:StopInstances
+                    - ec2:RebootInstances
+                  Resource: "*"
+                - !Ref AWS::NoValue
+              - !If
+                - Ec2
+                - Sid: TagInstances
+                  Effect: Allow
+                  Action:
+                    - ec2:CreateTags
+                    - ec2:DeleteTags
+                  Resource: !Sub arn:${AWS::Partition}:ec2:*:${AWS::AccountId}:instance/*
+                - !Ref AWS::NoValue
+              # Starting an instance whose EBS volumes use a customer-managed
+              # KMS key needs a grant for EC2. Without it the instance goes
+              # pending and straight back to stopped. The key policy must
+              # allow this role too.
+              - !If
+                - Ec2
+                - Sid: StartEncryptedInstances
+                  Effect: Allow
+                  Action: kms:CreateGrant
+                  Resource: "*"
+                  Condition:
+                    Bool:
+                      kms:GrantIsForAWSResource: "true"
+                - !Ref AWS::NoValue
+              - !If
+                - Rds
+                - Sid: ListAndControlDatabases
+                  Effect: Allow
+                  Action:
+                    - rds:DescribeDBInstances
+                    - rds:DescribeDBClusters
+                    - rds:ListTagsForResource
+                    - rds:StartDBInstance
+                    - rds:StopDBInstance
+                    - rds:RebootDBInstance
+                    - rds:StartDBCluster
+                    - rds:StopDBCluster
+                  Resource: "*"
+                - !Ref AWS::NoValue
+              - !If
+                - Rds
+                - Sid: TagDatabases
+                  Effect: Allow
+                  Action:
+                    - rds:AddTagsToResource
+                    - rds:RemoveTagsFromResource
+                  Resource:
+                    - !Sub arn:${AWS::Partition}:rds:*:${AWS::AccountId}:db:*
+                    - !Sub arn:${AWS::Partition}:rds:*:${AWS::AccountId}:cluster:*
+                - !Ref AWS::NoValue
+              - !If
+                - AutoScaling
+                - Sid: ListAndScaleAutoScalingGroups
+                  Effect: Allow
+                  Action:
+                    - autoscaling:DescribeAutoScalingGroups
+                    - autoscaling:UpdateAutoScalingGroup
+                    - autoscaling:CreateOrUpdateTags
+                    - autoscaling:DeleteTags
+                  Resource: "*"
+                - !Ref AWS::NoValue
+              - !If
+                - Ecs
+                - Sid: ListAndScaleEcsServices
+                  Effect: Allow
+                  Action:
+                    - ecs:ListClusters
+                    - ecs:ListServices
+                    - ecs:DescribeServices
+                    - ecs:UpdateService
+                    - ecs:TagResource
+                    - ecs:UntagResource
+                  Resource: "*"
+                - !Ref AWS::NoValue
+              - !If
+                - Eks
+                - Sid: ListAndScaleEksNodeGroups
+                  Effect: Allow
+                  Action:
+                    - eks:ListClusters
+                    - eks:ListNodegroups
+                    - eks:DescribeNodegroup
+                    - eks:UpdateNodegroupConfig
+                    - eks:TagResource
+                    - eks:UntagResource
+                  Resource: "*"
+                - !Ref AWS::NoValue
+              - !If
+                - Redshift
+                - Sid: PauseAndResumeRedshift
+                  Effect: Allow
+                  Action:
+                    - redshift:DescribeClusters
+                    - redshift:PauseCluster
+                    - redshift:ResumeCluster
+                    - redshift:RebootCluster
+                    - redshift:CreateTags
+                    - redshift:DeleteTags
+                  Resource: "*"
+                - !Ref AWS::NoValue
+              - !If
+                - SageMaker
+                - Sid: StartAndStopNotebooks
+                  Effect: Allow
+                  Action:
+                    - sagemaker:ListNotebookInstances
+                    - sagemaker:DescribeNotebookInstance
+                    - sagemaker:ListTags
+                    - sagemaker:StartNotebookInstance
+                    - sagemaker:StopNotebookInstance
+                    - sagemaker:AddTags
+                    - sagemaker:DeleteTags
+                  Resource: "*"
+                - !Ref AWS::NoValue
+              - !If
+                - Lightsail
+                - Sid: StartAndStopLightsail
+                  Effect: Allow
+                  Action:
+                    - lightsail:GetInstances
+                    - lightsail:GetInstance
+                    - lightsail:StartInstance
+                    - lightsail:StopInstance
+                    - lightsail:RebootInstance
+                    - lightsail:TagResource
+                    - lightsail:UntagResource
+                  Resource: "*"
+                - !Ref AWS::NoValue
+              # Instance Scheduler keeps schedules and periods in a table named
+              # like "<stack>-ConfigTable-<id>"; listing finds it, scanning reads it.
+              - !If
+                - Schedules
+                - Sid: ReadInstanceSchedulerConfig
+                  Effect: Allow
+                  Action: dynamodb:ListTables
+                  Resource: "*"
+                - !Ref AWS::NoValue
+              - !If
+                - Schedules
+                - Sid: ScanInstanceSchedulerConfig
+                  Effect: Allow
+                  Action: dynamodb:Scan
+                  Resource: !Sub arn:${AWS::Partition}:dynamodb:*:${AWS::AccountId}:table/*ConfigTable*
+                - !Ref AWS::NoValue
+              - !If
+                - Schedules
+                - Sid: ReadQuickSetupSchedules
+                  Effect: Allow
+                  Action:
+                    - ssm:ListAssociations
+                    - ssm:DescribeAssociation
+                  Resource: "*"
+                - !Ref AWS::NoValue
+
+Outputs:
+  RoleArn:
+    Description: Paste this into "Role to assume" when adding the account in Delegaris.
+    Value: !GetAtt Role.Arn

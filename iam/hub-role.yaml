@@ -1,0 +1,93 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  The identity Delegaris itself runs as: an IAM role and instance profile
+  for the EC2 instance that hosts the container. It can assume the
+  DelegarisRole in the accounts you manage and read AWS list prices for cost
+  estimates, and nothing else unless you name buckets below. Deploy once, in
+  the account the instance lives in, then attach the instance profile to the
+  instance.
+
+Parameters:
+  RoleName:
+    Type: String
+    Default: delegaris-hub
+  ManagedRoleName:
+    Type: String
+    Default: DelegarisRole
+    Description: >
+      Name of the role created in each managed account by
+      member-account-role.yaml. Keep the two in step.
+  BackupBucketName:
+    Type: String
+    Default: ""
+    Description: >
+      Optional. An S3 bucket the service uploads its nightly database backup
+      to (BACKUP_S3_BUCKET). Leave empty to keep backups on the data volume only.
+  AuditBucketName:
+    Type: String
+    Default: ""
+    Description: >
+      Optional. An S3 bucket the service copies its activity log to
+      (Settings > Health and backups > Activity log to S3).
+
+Conditions:
+  HasBackupBucket: !Not [!Equals [!Ref BackupBucketName, ""]]
+  HasAuditBucket: !Not [!Equals [!Ref AuditBucketName, ""]]
+
+Resources:
+  Role:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref RoleName
+      Description: Identity of the Delegaris container
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: assume-managed-account-roles
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: sts:AssumeRole
+                Resource: !Sub arn:${AWS::Partition}:iam::*:role/${ManagedRoleName}
+              # AWS list prices, for the cost estimates. Read only, and not about your accounts.
+              - Sid: ReadListPrices
+                Effect: Allow
+                Action: pricing:GetProducts
+                Resource: "*"
+              - !If
+                - HasBackupBucket
+                - Sid: UploadBackups
+                  Effect: Allow
+                  Action: s3:PutObject
+                  Resource: !Sub arn:${AWS::Partition}:s3:::${BackupBucketName}/*
+                - !Ref AWS::NoValue
+              - !If
+                - HasAuditBucket
+                - Sid: ExportActivityLog
+                  Effect: Allow
+                  Action: s3:PutObject
+                  Resource: !Sub arn:${AWS::Partition}:s3:::${AuditBucketName}/*
+                - !Ref AWS::NoValue
+
+  InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: !Ref RoleName
+      Roles:
+        - !Ref Role
+
+Outputs:
+  RoleArn:
+    Description: Give this as TrustedPrincipalArn when deploying member-account-role.yaml.
+    Value: !GetAtt Role.Arn
+  InstanceProfileName:
+    Description: >
+      Attach this to the EC2 instance that runs the container
+      (EC2 console > Actions > Security > Modify IAM role).
+    Value: !Ref InstanceProfile

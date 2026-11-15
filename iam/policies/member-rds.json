@@ -1,0 +1,32 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ListAndControlDatabases",
+      "Effect": "Allow",
+      "Action": [
+        "rds:DescribeDBInstances",
+        "rds:DescribeDBClusters",
+        "rds:ListTagsForResource",
+        "rds:StartDBInstance",
+        "rds:StopDBInstance",
+        "rds:RebootDBInstance",
+        "rds:StartDBCluster",
+        "rds:StopDBCluster"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "TagDatabases",
+      "Effect": "Allow",
+      "Action": [
+        "rds:AddTagsToResource",
+        "rds:RemoveTagsFromResource"
+      ],
+      "Resource": [
+        "arn:aws:rds:*:*:db:*",
+        "arn:aws:rds:*:*:cluster:*"
+      ]
+    }
+  ]
+}

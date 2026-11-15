@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://docs.delegaris.co.uk
+    about: Installing, setting up AWS and sign-in, and how everything works.
+  - name: Security problem
+    url: https://github.com/Goodhall-Solutions/delegaris/blob/main/SECURITY.md
+    about: Please report security problems privately, not as an issue.
+  - name: Help from Goodhall Solutions
+    url: https://goodhallsolutions.co.uk
+    about: Help setting Delegaris up, or with AWS more generally.

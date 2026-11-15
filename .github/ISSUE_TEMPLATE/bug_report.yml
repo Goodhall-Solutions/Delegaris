@@ -1,0 +1,39 @@
+name: Something is not working
+description: Delegaris does something wrong, or something it should do fails.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what happened instead. Error messages exactly as shown help most.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Delegaris version
+      description: From /healthz, or `delegaris version` on Linux.
+      placeholder: 0.9.0
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: How it is installed
+      options: [Docker, Docker Compose, Linux package, More than one copy (PostgreSQL)]
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Log lines
+      description: From `docker compose logs delegaris` or `journalctl -u delegaris`. Remove anything private (account IDs, names, addresses) first.
+      render: text
+  - type: checkboxes
+    id: private
+    attributes:
+      label: Before sending
+      options:
+        - label: I have removed passwords, keys and anything else private from this report.
+          required: true

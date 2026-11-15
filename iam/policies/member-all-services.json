@@ -1,0 +1,141 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ListAndControlInstances",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:DescribeInstances",
+        "ec2:StartInstances",
+        "ec2:StopInstances",
+        "ec2:RebootInstances"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "TagInstances",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:CreateTags",
+        "ec2:DeleteTags"
+      ],
+      "Resource": "arn:aws:ec2:*:*:instance/*"
+    },
+    {
+      "Sid": "StartEncryptedInstances",
+      "Effect": "Allow",
+      "Action": "kms:CreateGrant",
+      "Resource": "*",
+      "Condition": {
+        "Bool": {
+          "kms:GrantIsForAWSResource": "true"
+        }
+      }
+    },
+    {
+      "Sid": "ListAndControlDatabases",
+      "Effect": "Allow",
+      "Action": [
+        "rds:DescribeDBInstances",
+        "rds:DescribeDBClusters",
+        "rds:ListTagsForResource",
+        "rds:StartDBInstance",
+        "rds:StopDBInstance",
+        "rds:RebootDBInstance",
+        "rds:StartDBCluster",
+        "rds:StopDBCluster"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "TagDatabases",
+      "Effect": "Allow",
+      "Action": [
+        "rds:AddTagsToResource",
+        "rds:RemoveTagsFromResource"
+      ],
+      "Resource": [
+        "arn:aws:rds:*:*:db:*",
+        "arn:aws:rds:*:*:cluster:*"
+      ]
+    },
+    {
+      "Sid": "ListAndScaleAutoScalingGroups",
+      "Effect": "Allow",
+      "Action": [
+        "autoscaling:DescribeAutoScalingGroups",
+        "autoscaling:UpdateAutoScalingGroup",
+        "autoscaling:CreateOrUpdateTags",
+        "autoscaling:DeleteTags"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "ListAndScaleEcsServices",
+      "Effect": "Allow",
+      "Action": [
+        "ecs:ListClusters",
+        "ecs:ListServices",
+        "ecs:DescribeServices",
+        "ecs:UpdateService",
+        "ecs:TagResource",
+        "ecs:UntagResource"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "ListAndScaleEksNodeGroups",
+      "Effect": "Allow",
+      "Action": [
+        "eks:ListClusters",
+        "eks:ListNodegroups",
+        "eks:DescribeNodegroup",
+        "eks:UpdateNodegroupConfig",
+        "eks:TagResource",
+        "eks:UntagResource"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "PauseAndResumeRedshift",
+      "Effect": "Allow",
+      "Action": [
+        "redshift:DescribeClusters",
+        "redshift:PauseCluster",
+        "redshift:ResumeCluster",
+        "redshift:RebootCluster",
+        "redshift:CreateTags",
+        "redshift:DeleteTags"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "StartAndStopNotebooks",
+      "Effect": "Allow",
+      "Action": [
+        "sagemaker:ListNotebookInstances",
+        "sagemaker:DescribeNotebookInstance",
+        "sagemaker:ListTags",
+        "sagemaker:StartNotebookInstance",
+        "sagemaker:StopNotebookInstance",
+        "sagemaker:AddTags",
+        "sagemaker:DeleteTags"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "StartAndStopLightsail",
+      "Effect": "Allow",
+      "Action": [
+        "lightsail:GetInstances",
+        "lightsail:GetInstance",
+        "lightsail:StartInstance",
+        "lightsail:StopInstance",
+        "lightsail:RebootInstance",
+        "lightsail:TagResource",
+        "lightsail:UntagResource"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
