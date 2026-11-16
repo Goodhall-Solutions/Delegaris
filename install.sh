@@ -180,7 +180,9 @@ PY
         fi
     fi
 
-    # Keep the newest few releases, so going back is a symlink away.
+    # Keep the newest few releases, so going back is a symlink away. (Release folders are
+    # version numbers, so ls is safe here, and it sorts by time.)
+    # shellcheck disable=SC2012
     ls -1t "$PREFIX/releases" | { grep -v -x -F "$NEW_VERSION" || true; } | tail -n +"$KEEP_RELEASES" | while read -r old; do
         rm -rf "${PREFIX:?}/releases/$old"
     done
@@ -223,7 +225,8 @@ PY
         fi
     else
         warn "systemd was not found, so Delegaris was not set up as a service. Start it with:"
-        echo "    sudo -u delegaris env \$(grep -v '^#' $ENV_FILE | xargs) $PREFIX/current/bin/delegaris serve"
+        echo "    sudo -u delegaris $CLI serve"
+        echo "  It reads $ENV_FILE itself, and logs to the terminal it was started from."
     fi
 
     # -- done ---------------------------------------------------------------------------------------
@@ -238,9 +241,15 @@ PY
     if [ -n "$FIRST_PASSWORD" ]; then
         echo "    Sign in:   admin / $FIRST_PASSWORD   (the break-glass administrator; it is in $ENV_FILE)"
     fi
-    echo "    Settings:  $ENV_FILE   (then: sudo systemctl restart delegaris)"
+    if [ "$HAS_SYSTEMD" = 1 ]; then
+        echo "    Settings:  $ENV_FILE   (then: sudo systemctl restart delegaris)"
+    else
+        echo "    Settings:  $ENV_FILE   (then stop the service and start it again)"
+    fi
     echo "    Data:      $DATA_DIR   (keep the ENCRYPTION_KEY from the settings with your backups)"
-    echo "    Logs:      journalctl -u delegaris -f"
+    if [ "$HAS_SYSTEMD" = 1 ]; then
+        echo "    Logs:      journalctl -u delegaris -f"
+    fi
     echo "    Uninstall: sudo $PREFIX/uninstall.sh"
     echo "    Docs:      https://docs.delegaris.co.uk"
     if command -v firewall-cmd >/dev/null 2>&1 && firewall-cmd --state >/dev/null 2>&1; then
