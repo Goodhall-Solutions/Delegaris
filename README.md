@@ -5,14 +5,16 @@ Free, self-hosted, from <a href="https://goodhallsolutions.co.uk">Goodhall Solut
 
 ---
 
-Delegaris lets people who have no AWS access start, stop and keep on the machines they need, across any number of AWS accounts, within rules you set. They sign in with Active Directory or Microsoft Entra ID, see only what an access rule gives them, and the hosting team keeps ownership of the schedules.
+Delegaris is a free, self-hosted portal that lets people without AWS console access start, stop and keep on EC2, RDS and other AWS resources across any number of accounts, within role-based rules written against Active Directory or Entra ID groups. People sign in with the directory account they already have, see only what an access rule gives them, and the hosting team keeps ownership of the schedules.
 
 - **Keep on past the schedule**, **book ahead**, and **server groups** that start in order
 - **Access rules** by group, account, tag and name, with **approvals** for the delicate ones and **requests for access**
 - **EC2, RDS, Aurora, DocumentDB, Neptune, Auto Scaling, ECS, EKS, Redshift, SageMaker and Lightsail**
 - **Remote Desktop** files for Windows machines, **cost estimates**, **Slack and Teams**, **reports**, a full **activity log**, **API tokens**, **two-step sign-in**, **high availability**
 
-Website: [delegaris.co.uk](https://delegaris.co.uk) · Documentation: [docs.delegaris.co.uk](https://docs.delegaris.co.uk)
+Website: [delegaris.co.uk](https://delegaris.co.uk) · Documentation: [docs.delegaris.co.uk](https://docs.delegaris.co.uk) · [Security and trust](https://delegaris.co.uk/security)
+
+Delegaris is free to use, including commercially, under the [Delegaris Free Licence](LICENSE). The application source is not published: this repository holds the installer, the IAM templates and policies, the demo, the licence and the releases.
 
 ## Install
 
