@@ -2,9 +2,9 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: >
   Role that Delegaris assumes in this account to list, start, stop and tag
   EC2 instances, RDS databases and, where switched on, Auto Scaling groups,
-  ECS services, EKS node groups, Redshift clusters, SageMaker notebooks and
-  Lightsail instances. Deploy once per managed account (a CloudFormation
-  StackSet works well across an organisation).
+  ECS services, EKS node groups, Redshift clusters, SageMaker notebooks,
+  Lightsail instances and App Runner services. Deploy once per managed
+  account (a CloudFormation StackSet works well across an organisation).
 
 Parameters:
   TrustedPrincipalArn:
@@ -61,6 +61,11 @@ Parameters:
     Default: "false"
     AllowedValues: ["true", "false"]
     Description: Allow listing, starting, stopping, rebooting and tagging Lightsail instances.
+  ManageAppRunner:
+    Type: String
+    Default: "false"
+    AllowedValues: ["true", "false"]
+    Description: Allow listing, pausing, resuming and tagging App Runner services.
   ReadSchedules:
     Type: String
     Default: "false"
@@ -81,6 +86,7 @@ Conditions:
   Redshift: !Equals [!Ref ManageRedshift, "true"]
   SageMaker: !Equals [!Ref ManageSageMaker, "true"]
   Lightsail: !Equals [!Ref ManageLightsail, "true"]
+  AppRunner: !Equals [!Ref ManageAppRunner, "true"]
 
 Rules:
   AtLeastOneService:
@@ -94,6 +100,7 @@ Rules:
           - !Equals [!Ref ManageRedshift, "true"]
           - !Equals [!Ref ManageSageMaker, "true"]
           - !Equals [!Ref ManageLightsail, "true"]
+          - !Equals [!Ref ManageAppRunner, "true"]
         AssertDescription: Set at least one of the Manage parameters to true.
 
 Resources:
@@ -256,6 +263,20 @@ Resources:
                     - lightsail:RebootInstance
                     - lightsail:TagResource
                     - lightsail:UntagResource
+                  Resource: "*"
+                - !Ref AWS::NoValue
+              - !If
+                - AppRunner
+                - Sid: StartAndStopAppRunner
+                  Effect: Allow
+                  Action:
+                    - apprunner:ListServices
+                    - apprunner:DescribeService
+                    - apprunner:PauseService
+                    - apprunner:ResumeService
+                    - apprunner:ListTagsForResource
+                    - apprunner:TagResource
+                    - apprunner:UntagResource
                   Resource: "*"
                 - !Ref AWS::NoValue
               # Instance Scheduler keeps schedules and periods in a table named

@@ -9,7 +9,7 @@ Delegaris is a free, self-hosted portal that lets people without AWS console acc
 
 - **Keep on past the schedule**, **book ahead**, and **server groups** that start in order
 - **Access rules** by group, account, tag and name, with **approvals** for the delicate ones and **requests for access**
-- **EC2, RDS, Aurora, DocumentDB, Neptune, Auto Scaling, ECS, EKS, Redshift, SageMaker and Lightsail**
+- **EC2, RDS, Aurora, DocumentDB, Neptune, Auto Scaling, ECS, EKS, Redshift, SageMaker, Lightsail and App Runner**
 - **Remote Desktop** files for Windows machines, **cost estimates**, **Slack and Teams**, **reports**, a full **activity log**, **API tokens**, **two-step sign-in**, **high availability**
 
 Website: [delegaris.co.uk](https://delegaris.co.uk) · Documentation: [docs.delegaris.co.uk](https://docs.delegaris.co.uk) · [Security and trust](https://delegaris.co.uk/security)

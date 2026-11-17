@@ -1,0 +1,19 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "StartAndStopAppRunner",
+      "Effect": "Allow",
+      "Action": [
+        "apprunner:ListServices",
+        "apprunner:DescribeService",
+        "apprunner:PauseService",
+        "apprunner:ResumeService",
+        "apprunner:ListTagsForResource",
+        "apprunner:TagResource",
+        "apprunner:UntagResource"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
